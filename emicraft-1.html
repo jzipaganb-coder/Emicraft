@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emicraft — Minecraft Server</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --magenta: #E619C9;
+    --magenta-deep: #A0159C;
+    --cyan: #3FE0FF;
+    --cyan-deep: #1CA8CF;
+    --bg: #120A1A;
+    --bg-darker: #0A0510;
+    --panel: #1D1128;
+    --panel-2: #241531;
+    --line: #3A2548;
+    --text: #F3EBFB;
+    --text-dim: #B79FCC;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    overflow-x:hidden;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 40px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 2px, transparent 2px, transparent 40px);
+  }
+
+  .pixel{ font-family:'Press Start 2P', monospace; }
+
+  a{ color:inherit; text-decoration:none; }
+  ul{ list-style:none; }
+  img{ max-width:100%; display:block; }
+
+  ::selection{ background:var(--magenta); color:#fff; }
+
+  /* ---------- Scrollbar ---------- */
+  ::-webkit-scrollbar{ width:12px; }
+  ::-webkit-scrollbar-track{ background:var(--bg-darker); }
+  ::-webkit-scrollbar-thumb{ background:linear-gradient(var(--magenta), var(--cyan)); border:3px solid var(--bg-darker); }
+
+  /* ---------- Utility ---------- */
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+  .eyebrow{
+    font-size:11px; letter-spacing:2px; color:var(--cyan);
+    font-family:'Press Start 2P', monospace;
+    display:inline-block; margin-bottom:18px;
+  }
+  .eyebrow::before{ content:"// "; color:var(--magenta); }
+  section{ padding:110px 0; position:relative; }
+  h2.section-title{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(20px,3.4vw,34px);
+    line-height:1.5;
+    margin-bottom:14px;
+    text-shadow: 3px 3px 0 rgba(230,25,201,0.35);
+  }
+  .lede{ color:var(--text-dim); max-width:620px; font-size:16px; line-height:1.7; margin-bottom:56px; }
+  .grad-text{
+    background:linear-gradient(90deg, var(--magenta), var(--cyan));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+
+  /* ---------- Blocky button (signature element) ---------- */
+  .mc-btn{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    padding:16px 22px;
+    color:#fff;
+    background:linear-gradient(135deg, var(--magenta), var(--cyan-deep));
+    border:none;
+    cursor:pointer;
+    position:relative;
+    box-shadow:
+      inset -4px -4px 0 rgba(0,0,0,0.35),
+      inset 4px 4px 0 rgba(255,255,255,0.18),
+      6px 6px 0 rgba(0,0,0,0.45);
+    transition:transform .12s ease, box-shadow .12s ease;
+    image-rendering:pixelated;
+  }
+  .mc-btn:hover{
+    transform:translate(-2px,-2px);
+    box-shadow:
+      inset -4px -4px 0 rgba(0,0,0,0.35),
+      inset 4px 4px 0 rgba(255,255,255,0.18),
+      9px 9px 0 rgba(0,0,0,0.45);
+  }
+  .mc-btn:active{
+    transform:translate(2px,2px);
+    box-shadow:
+      inset -4px -4px 0 rgba(0,0,0,0.35),
+      inset 4px 4px 0 rgba(255,255,255,0.18),
+      2px 2px 0 rgba(0,0,0,0.45);
+  }
+  .mc-btn.ghost{
+    background:var(--panel-2);
+    box-shadow:
+      inset -4px -4px 0 rgba(0,0,0,0.4),
+      inset 4px 4px 0 rgba(255,255,255,0.06),
+      6px 6px 0 rgba(0,0,0,0.45);
+  }
+  .mc-btn.small{ font-size:10px; padding:12px 16px; }
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,5,16,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:2px solid var(--line);
+  }
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px; max-width:1180px; margin:0 auto;
+  }
+  .logo{
+    font-family:'Press Start 2P', monospace;
+    font-size:16px;
+    letter-spacing:1px;
+  }
+  .logo span:first-child{ color:var(--magenta); }
+  .logo span:last-child{ color:var(--cyan); }
+  .nav-links{ display:flex; gap:28px; align-items:center; }
+  .nav-links a{
+    font-size:13px; font-weight:600; color:var(--text-dim);
+    transition:color .15s ease;
+    letter-spacing:.3px;
+  }
+  .nav-links a:hover{ color:var(--cyan); }
+  .nav-toggle{ display:none; background:none; border:none; color:var(--text); font-size:26px; cursor:pointer; }
+
+  @media (max-width:860px){
+    .nav-links{
+      position:absolute; top:100%; left:0; right:0;
+      background:var(--bg-darker);
+      flex-direction:column; align-items:flex-start;
+      padding:20px 24px; gap:18px;
+      border-bottom:2px solid var(--line);
+      display:none;
+    }
+    .nav-links.open{ display:flex; }
+    .nav-toggle{ display:block; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height:92vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:60px 24px;
+    position:relative;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(230,25,201,0.22), transparent 45%),
+      radial-gradient(circle at 80% 75%, rgba(63,224,255,0.22), transparent 45%);
+    overflow:hidden;
+  }
+  .hero-blocks{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .cube{
+    position:absolute; width:26px; height:26px;
+    background:linear-gradient(135deg, var(--magenta), var(--cyan));
+    opacity:.35;
+    animation:float 9s ease-in-out infinite;
+    box-shadow: inset -4px -4px 0 rgba(0,0,0,0.35), inset 4px 4px 0 rgba(255,255,255,0.2);
+  }
+  @keyframes float{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(-30px) rotate(20deg); }
+  }
+  .hero-inner{ position:relative; z-index:1; }
+  .hero .eyebrow{ margin-bottom:26px; }
+  .hero h1{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(32px, 7vw, 68px);
+    line-height:1.35;
+    text-shadow: 5px 5px 0 rgba(0,0,0,0.4);
+  }
+  .hero p.tag{
+    margin:26px auto 40px; max-width:560px;
+    color:var(--text-dim); font-size:17px; line-height:1.7;
+  }
+  .hero-ctas{ display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
+  .hero-scroll{
+    margin-top:70px; font-size:11px; color:var(--text-dim);
+    font-family:'Press Start 2P', monospace;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .hero-scroll .bar{ width:2px; height:36px; background:linear-gradient(var(--magenta), var(--cyan)); animation:scrollpulse 1.6s ease-in-out infinite; }
+  @keyframes scrollpulse{ 0%,100%{ opacity:.2; } 50%{ opacity:1; } }
+
+  /* ---------- Reveal ---------- */
+  .reveal{ opacity:0; transform:translateY(28px); transition:opacity .6s ease, transform .6s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ---------- Streamers ---------- */
+  .streamer-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px;
+  }
+  .streamer-card{
+    background:var(--panel);
+    border:2px solid var(--line);
+    padding:28px 22px;
+    text-align:center;
+    position:relative;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .streamer-card:hover{ transform:translateY(-6px); border-color:var(--cyan); }
+  .avatar{
+    width:74px; height:74px; margin:0 auto 20px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Press Start 2P', monospace; font-size:22px; color:#fff;
+    box-shadow: inset -5px -5px 0 rgba(0,0,0,0.3), inset 5px 5px 0 rgba(255,255,255,0.2);
+  }
+  .streamer-card h3{ font-size:19px; margin-bottom:6px; }
+  .streamer-card .role{ color:var(--text-dim); font-size:12px; margin-bottom:22px; letter-spacing:.5px; }
+  .tiktok-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--panel-2); border:2px solid var(--line);
+    padding:10px 16px; font-size:13px; font-weight:600;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .tiktok-btn:hover{ border-color:var(--magenta); color:var(--cyan); }
+  .tiktok-btn svg{ width:16px; height:16px; fill:currentColor; }
+
+  /* ---------- Staff ---------- */
+  .staff-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px;
+  }
+  .staff-card{
+    background:var(--panel); border-left:4px solid var(--magenta);
+    padding:24px; display:flex; align-items:center; gap:16px;
+    border-top:2px solid var(--line); border-right:2px solid var(--line); border-bottom:2px solid var(--line);
+  }
+  .staff-card.cyan-edge{ border-left-color:var(--cyan); }
+  .staff-avatar{
+    width:48px; height:48px; flex:none;
+    font-family:'Press Start 2P', monospace; font-size:15px; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--magenta), var(--cyan));
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.2);
+  }
+  .staff-card h4{ font-size:16px; margin-bottom:4px; }
+  .staff-card .staff-role{ font-size:11px; color:var(--cyan); letter-spacing:.5px; text-transform:uppercase; font-weight:600; }
+
+  /* ---------- Coin shop ---------- */
+  .shop-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:20px;
+  }
+  .shop-card{
+    background:var(--panel); border:2px solid var(--line);
+    padding:26px 22px; text-align:center;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .shop-card.featured{ border-color:var(--magenta); box-shadow:0 0 0 1px var(--magenta); position:relative; }
+  .shop-card.featured::before{
+    content:"BEST VALUE"; position:absolute; top:-13px; left:50%; transform:translateX(-50%);
+    background:var(--magenta); font-family:'Press Start 2P', monospace; font-size:9px;
+    padding:6px 10px; letter-spacing:1px; white-space:nowrap;
+  }
+  .shop-card .coin-amt{ font-family:'Press Start 2P', monospace; font-size:20px; color:var(--cyan); margin-top:6px; }
+  .shop-card .pack-name{ font-size:17px; font-weight:700; }
+  .shop-card .price{ font-size:24px; font-weight:700; color:var(--magenta); }
+  .shop-card .price span{ font-size:13px; color:var(--text-dim); font-weight:500; }
+
+  /* ---------- Ranks ---------- */
+  .rank-block{ margin-bottom:70px; }
+  .rank-block h3{ font-size:19px; margin-bottom:26px; display:flex; align-items:center; gap:12px; }
+  .rank-block h3 .dot{ width:10px; height:10px; background:var(--cyan); }
+  .rank-path{
+    display:flex; flex-wrap:wrap; gap:0; align-items:stretch;
+  }
+  .rank-step{
+    flex:1 1 140px;
+    background:var(--panel); border:2px solid var(--line);
+    padding:20px 14px; text-align:center; position:relative;
+    margin-right:-2px; margin-bottom:12px;
+  }
+  .rank-step .lvl{ font-family:'Press Start 2P', monospace; font-size:10px; color:var(--text-dim); margin-bottom:10px; }
+  .rank-step .name{ font-weight:700; font-size:16px; }
+  .rank-step:nth-child(1){ background:linear-gradient(180deg, var(--panel), var(--panel)); }
+  .rank-step:nth-child(6) .name{ background:linear-gradient(90deg,var(--magenta),var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+  .paid-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px; }
+  .paid-card{
+    background:linear-gradient(160deg, var(--panel-2), var(--panel));
+    border:2px solid var(--line); padding:26px 20px; text-align:center;
+  }
+  .paid-card .name{ font-family:'Press Start 2P', monospace; font-size:14px; margin-bottom:10px; }
+  .paid-card:nth-child(1) .name{ color:#C7B8E0; }
+  .paid-card:nth-child(2) .name{ color:var(--cyan); }
+  .paid-card:nth-child(3) .name{ color:#FFD86B; }
+  .paid-card:nth-child(4) .name{ color:var(--magenta); text-shadow:0 0 12px rgba(230,25,201,0.6); }
+  .paid-card .desc{ font-size:12px; color:var(--text-dim); }
+
+  .special-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+  .special-card{
+    background:var(--panel); border:2px solid var(--line); border-top:4px solid var(--magenta);
+    padding:26px 22px;
+  }
+  .special-card:nth-child(2){ border-top-color:var(--cyan); }
+  .special-card:nth-child(3){ border-top-color:#FFD86B; }
+  .special-card:nth-child(4){ border-top-color:#7CFFB2; }
+  .special-card h4{ font-family:'Press Start 2P', monospace; font-size:13px; margin-bottom:14px; }
+  .special-card p{ color:var(--text-dim); font-size:14px; line-height:1.7; }
+  .note-box{
+    margin-top:30px; border:2px dashed var(--line); padding:18px 22px;
+    font-size:13px; color:var(--text-dim); line-height:1.7;
+  }
+  .note-box strong{ color:var(--cyan); }
+
+  /* ---------- How to join ---------- */
+  .steps{ counter-reset:step; }
+  .step{
+    display:flex; gap:24px; padding:28px 0; border-bottom:2px solid var(--line);
+    align-items:flex-start;
+  }
+  .step:last-child{ border-bottom:none; }
+  .step-num{
+    counter-increment:step; content:counter(step);
+    font-family:'Press Start 2P', monospace; font-size:22px;
+    width:56px; height:56px; flex:none; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--magenta), var(--cyan));
+    box-shadow: inset -4px -4px 0 rgba(0,0,0,0.3), inset 4px 4px 0 rgba(255,255,255,0.2);
+  }
+  .step-num::before{ content: counter(step); }
+  .step h4{ font-size:18px; margin-bottom:8px; }
+  .step p{ color:var(--text-dim); font-size:15px; line-height:1.7; }
+  .step .fork{ display:flex; gap:14px; margin-top:14px; flex-wrap:wrap; }
+  .fork-card{
+    background:var(--panel-2); border:2px solid var(--line); padding:14px 16px; flex:1 1 220px; font-size:13px; color:var(--text-dim);
+  }
+  .fork-card b{ color:var(--text); display:block; margin-bottom:6px; font-size:14px; }
+
+  /* ---------- Voting ---------- */
+  .vote-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px; }
+  .vote-card{
+    background:var(--panel); border:2px solid var(--line);
+    padding:24px 20px; text-align:center; display:flex; flex-direction:column; gap:14px; align-items:center;
+  }
+  .vote-card .vicon{
+    width:44px; height:44px; background:linear-gradient(135deg, var(--cyan), var(--magenta));
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.2);
+  }
+  .vote-card p{ font-size:13px; color:var(--text-dim); }
+
+  /* ---------- Discord CTA ---------- */
+  .discord-cta{
+    background:linear-gradient(120deg, rgba(230,25,201,0.18), rgba(63,224,255,0.18));
+    border-top:2px solid var(--line); border-bottom:2px solid var(--line);
+    padding:90px 24px; text-align:center;
+  }
+  .discord-cta h2{ font-family:'Press Start 2P', monospace; font-size:clamp(18px,3vw,28px); margin-bottom:18px; }
+  .discord-cta p{ color:var(--text-dim); max-width:520px; margin:0 auto 34px; font-size:15px; line-height:1.7; }
+
+  /* ---------- Footer ---------- */
+  footer{ padding:50px 24px 40px; text-align:center; }
+  footer .logo{ justify-content:center; margin-bottom:14px; display:flex; }
+  footer p{ color:var(--text-dim); font-size:12px; }
+
+  @media (max-width:600px){
+    section{ padding:70px 0; }
+    .step{ flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo pixel"><span>EMI</span><span>CRAFT</span></div>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#streamers">Streamers</a></li>
+      <li><a href="#staff">Staff</a></li>
+      <li><a href="#shop">Coin Shop</a></li>
+      <li><a href="#ranks">Ranks</a></li>
+      <li><a href="#join">How to Join</a></li>
+      <li><a href="#vote">Vote</a></li>
+      <li><a class="mc-btn small" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Discord</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-blocks" id="heroBlocks"></div>
+  <div class="hero-inner">
+    <div class="eyebrow">SURVIVAL · SMP · COMMUNITY</div>
+    <h1><span class="grad-text">EMICRAFT</span></h1>
+    <p class="tag">A magenta-and-cyan-coded Minecraft server built by streamers, run by a real staff team, and grown one grind at a time. Climb the ranks, watch the creators, join the family.</p>
+    <div class="hero-ctas">
+      <a class="mc-btn" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Join Discord</a>
+      <a class="mc-btn ghost" href="#join">How to Join →</a>
+    </div>
+    <div class="hero-scroll"><span>SCROLL</span><span class="bar"></span></div>
+  </div>
+</section>
+
+<!-- STREAMERS -->
+<section id="streamers">
+  <div class="wrap reveal">
+    <div class="eyebrow">OUR CREATORS</div>
+    <h2 class="section-title">Watch us <span class="grad-text">live</span></h2>
+    <p class="lede">Emicraft's streamers bring the server to TikTok. Tap a card to follow along.</p>
+
+    <div class="streamer-grid">
+
+      <div class="streamer-card">
+        <div class="avatar" style="background:linear-gradient(135deg,#E619C9,#A0159C);">C</div>
+        <h3>Caimici</h3>
+        <div class="role">Server Admin & Creator</div>
+        <a class="tiktok-btn" href="https://www.tiktok.com/@caiceyyy?_r=1&_t=ZS-97jIGiRrI9J" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M16.6 5.82a4.28 4.28 0 0 1-.86-2.5h-3.06v13.36a2.6 2.6 0 1 1-2.16-2.56V11.6a5.66 5.66 0 1 0 4.92 5.62V9.68a7.3 7.3 0 0 0 4.26 1.36V8.02a4.29 4.29 0 0 1-3.1-2.2z"/></svg>
+          Watch on TikTok
+        </a>
+      </div>
+
+      <div class="streamer-card">
+        <div class="avatar" style="background:linear-gradient(135deg,#3FE0FF,#1CA8CF);">E</div>
+        <h3>Emijeans</h3>
+        <div class="role">Owner & Creator</div>
+        <a class="tiktok-btn" href="https://www.tiktok.com/@amberemijeans?_r=1&_t=ZS-97jIGOxUcNd" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M16.6 5.82a4.28 4.28 0 0 1-.86-2.5h-3.06v13.36a2.6 2.6 0 1 1-2.16-2.56V11.6a5.66 5.66 0 1 0 4.92 5.62V9.68a7.3 7.3 0 0 0 4.26 1.36V8.02a4.29 4.29 0 0 1-3.1-2.2z"/></svg>
+          Watch on TikTok
+        </a>
+      </div>
+
+      <div class="streamer-card">
+        <div class="avatar" style="background:linear-gradient(135deg,#E619C9,#3FE0FF);">K</div>
+        <h3>Kanorskie</h3>
+        <div class="role">Head Media & Creator</div>
+        <a class="tiktok-btn" href="https://www.tiktok.com/@k4n00rskie?_r=1&_t=ZS-97jIIidvLX7" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M16.6 5.82a4.28 4.28 0 0 1-.86-2.5h-3.06v13.36a2.6 2.6 0 1 1-2.16-2.56V11.6a5.66 5.66 0 1 0 4.92 5.62V9.68a7.3 7.3 0 0 0 4.26 1.36V8.02a4.29 4.29 0 0 1-3.1-2.2z"/></svg>
+          Watch on TikTok
+        </a>
+      </div>
+
+      <div class="streamer-card">
+        <div class="avatar" style="background:linear-gradient(135deg,#A0159C,#1CA8CF);">M</div>
+        <h3>Maaawiiii</h3>
+        <div class="role">Creator</div>
+        <a class="tiktok-btn" href="https://www.tiktok.com/@maaawiiii7?_r=1&_t=ZS-97jIIyGQhLV" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M16.6 5.82a4.28 4.28 0 0 1-.86-2.5h-3.06v13.36a2.6 2.6 0 1 1-2.16-2.56V11.6a5.66 5.66 0 1 0 4.92 5.62V9.68a7.3 7.3 0 0 0 4.26 1.36V8.02a4.29 4.29 0 0 1-3.1-2.2z"/></svg>
+          Watch on TikTok
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STAFF -->
+<section id="staff" style="background:var(--bg-darker);">
+  <div class="wrap reveal">
+    <div class="eyebrow">THE TEAM</div>
+    <h2 class="section-title">Staff <span class="grad-text">Team</span></h2>
+    <p class="lede">Six people keeping Emicraft running, moderated, and growing.</p>
+
+    <div class="staff-grid">
+      <div class="staff-card"><div class="staff-avatar">E</div><div><h4>Emijeans</h4><div class="staff-role">Owner</div></div></div>
+      <div class="staff-card cyan-edge"><div class="staff-avatar">I</div><div><h4>ItzChim</h4><div class="staff-role">Co-Owner</div></div></div>
+      <div class="staff-card"><div class="staff-avatar">P</div><div><h4>Patt</h4><div class="staff-role">Developer</div></div></div>
+      <div class="staff-card cyan-edge"><div class="staff-avatar">C</div><div><h4>Caimici</h4><div class="staff-role">Admin</div></div></div>
+      <div class="staff-card"><div class="staff-avatar">A</div><div><h4>Asin</h4><div class="staff-role">Moderator</div></div></div>
+      <div class="staff-card cyan-edge"><div class="staff-avatar">K</div><div><h4>Kanorrskie</h4><div class="staff-role">Head Media</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COIN SHOP -->
+<section id="shop">
+  <div class="wrap reveal">
+    <div class="eyebrow">COIN SHOP</div>
+    <h2 class="section-title">Fuel your <span class="grad-text">grind</span></h2>
+    <p class="lede">Coins can be spent in-game once purchased. Prices shown in PHP — payment is arranged in Discord.</p>
+
+    <div class="shop-grid">
+      <div class="shop-card">
+        <div class="pack-name">Barya Pack</div>
+        <div class="coin-amt">60 coins</div>
+        <div class="price">₱20</div>
+        <a class="mc-btn small" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Get in Discord</a>
+      </div>
+      <div class="shop-card">
+        <div class="pack-name">Kaban Pack</div>
+        <div class="coin-amt">150 coins</div>
+        <div class="price">₱50</div>
+        <a class="mc-btn small" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Get in Discord</a>
+      </div>
+      <div class="shop-card featured">
+        <div class="pack-name">Bulsa Pack</div>
+        <div class="coin-amt">300 coins</div>
+        <div class="price">₱200</div>
+        <a class="mc-btn small" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Get in Discord</a>
+      </div>
+      <div class="shop-card">
+        <div class="pack-name">Baul Bundle</div>
+        <div class="coin-amt">1,350 coins</div>
+        <div class="price">₱450</div>
+        <a class="mc-btn small" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Get in Discord</a>
+      </div>
+      <div class="shop-card">
+        <div class="pack-name">Ginto Vault</div>
+        <div class="coin-amt">3,000 coins</div>
+        <div class="price">₱1,000</div>
+        <a class="mc-btn small" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Get in Discord</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RANKS -->
+<section id="ranks" style="background:var(--bg-darker);">
+  <div class="wrap reveal">
+    <div class="eyebrow">PROGRESSION</div>
+    <h2 class="section-title">Ranks &amp; <span class="grad-text">Perks</span></h2>
+    <p class="lede">Grind it out, buy your way up, or earn a title nobody can purchase.</p>
+
+    <div class="rank-block">
+      <h3><span class="dot"></span> Grindable Ranks</h3>
+      <div class="rank-path">
+        <div class="rank-step"><div class="lvl">STAGE 01</div><div class="name">Player</div></div>
+        <div class="rank-step"><div class="lvl">STAGE 02</div><div class="name">Member</div></div>
+        <div class="rank-step"><div class="lvl">STAGE 03</div><div class="name">Elite</div></div>
+        <div class="rank-step"><div class="lvl">STAGE 04</div><div class="name">Knight</div></div>
+        <div class="rank-step"><div class="lvl">STAGE 05</div><div class="name">Hero</div></div>
+        <div class="rank-step"><div class="lvl">STAGE 06</div><div class="name">Legend</div></div>
+      </div>
+    </div>
+
+    <div class="rank-block">
+      <h3><span class="dot" style="background:var(--magenta);"></span> Paid Ranks</h3>
+      <div class="paid-grid">
+        <div class="paid-card"><div class="name">VIP</div><div class="desc">Entry-level perks &amp; a colored name tag.</div></div>
+        <div class="paid-card"><div class="name">VIP+</div><div class="desc">More perks, extra homes, cosmetic kits.</div></div>
+        <div class="paid-card"><div class="name">MVP</div><div class="desc">Premium perks &amp; priority queue.</div></div>
+        <div class="paid-card"><div class="name">MVP+</div><div class="desc">Top purchasable tier — full perk set.</div></div>
+      </div>
+    </div>
+
+    <div class="rank-block" style="margin-bottom:0;">
+      <h3><span class="dot" style="background:#FFD86B;"></span> Special Ranks</h3>
+      <div class="special-grid">
+        <div class="special-card">
+          <h4>MASTER</h4>
+          <p>Reserved for the OGs who reached Legend and kept grinding beyond it. Not sold, not requested — staff hand-pick Master recipients each season based on hours played, community presence, and how long they've stuck with the server. It's the closest thing Emicraft has to a hall of fame.</p>
+        </div>
+        <div class="special-card">
+          <h4>DONATOR</h4>
+          <p>For anyone who makes a one-time donation to help keep the server online. A Donator tag, a unique chat color, and a small cosmetic bundle. This is the easiest special rank to get — open a ticket in Discord and the team will walk you through it.</p>
+        </div>
+        <div class="special-card">
+          <h4>SPONSOR</h4>
+          <p>For players who support Emicraft consistently over time — think recurring monthly support or a larger one-off contribution. Sponsors get everything Donators get, plus priority support, a shout-out in announcements, and early access to new features being tested.</p>
+        </div>
+        <div class="special-card">
+          <h4>BENEFACTOR</h4>
+          <p>The highest supporter tier — for those who help cover real running costs like hosting, plugins, or domain renewals. Benefactors get permanent recognition on the site and in-game, the full perk stack, and a direct line to staff for input on server decisions through a private supporters' channel.</p>
+        </div>
+      </div>
+      <div class="note-box">
+        <strong>Note:</strong> exact donation amounts, thresholds, and perk lists for Donator, Sponsor, and Benefactor are still being finalized by staff. If you're interested in supporting Emicraft, open a ticket in Discord and the team will confirm current pricing and benefits.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO JOIN -->
+<section id="join">
+  <div class="wrap reveal">
+    <div class="eyebrow">GET STARTED</div>
+    <h2 class="section-title">How to <span class="grad-text">join</span></h2>
+    <p class="lede">Four steps between you and the server.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"></div>
+        <div>
+          <h4>Join the Discord</h4>
+          <p>Everything starts here — the community, the rules, the application process.</p>
+          <a class="mc-btn small" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Join Discord</a>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"></div>
+        <div><h4>Read the rules</h4><p>Head to the rules channel and go through everything before doing anything else.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num"></div>
+        <div><h4>Self-role yourself</h4><p>Assign yourself the appropriate role so the server knows you're ready to apply.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num"></div>
+        <div>
+          <h4>Pick your path</h4>
+          <p>Choose how you want to get whitelisted. Application questions are posted in Discord.</p>
+          <div class="fork">
+            <div class="fork-card"><b>Interview</b>Tag a Mod or Admin in Discord and they'll take you through a live interview.</div>
+            <div class="fork-card"><b>Video Application</b>Record yourself answering the application questions and submit it in the applications channel.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VOTING -->
+<section id="vote" style="background:var(--bg-darker);">
+  <div class="wrap reveal">
+    <div class="eyebrow">SUPPORT US</div>
+    <h2 class="section-title">Vote for <span class="grad-text">Emicraft</span></h2>
+    <p class="lede">Voting is free and helps the server climb the rankings. Links are placeholders — swap in your real voting page URLs.</p>
+
+    <div class="vote-grid">
+      <div class="vote-card"><div class="vicon"></div><b>Minecraft-MP</b><p>Vote every 24 hours</p><a class="mc-btn small" href="#">Vote Now</a></div>
+      <div class="vote-card"><div class="vicon"></div><b>Planet Minecraft</b><p>Vote every 24 hours</p><a class="mc-btn small" href="#">Vote Now</a></div>
+      <div class="vote-card"><div class="vicon"></div><b>Top Minecraft Servers</b><p>Vote every 24 hours</p><a class="mc-btn small" href="#">Vote Now</a></div>
+      <div class="vote-card"><div class="vicon"></div><b>Minecraft Server List</b><p>Vote every 24 hours</p><a class="mc-btn small" href="#">Vote Now</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCORD CTA -->
+<div class="discord-cta">
+  <h2><span class="grad-text">Ready to spawn in?</span></h2>
+  <p>Join the Emicraft Discord to start your application, chat with the community, and stay up to date with everything happening on the server.</p>
+  <a class="mc-btn" href="https://discord.gg/KDQDjHh4n" target="_blank" rel="noopener">Join the Discord</a>
+</div>
+
+<footer>
+  <div class="logo pixel"><span>EMI</span><span>CRAFT</span></div>
+  <p>© 2026 Emicraft. Not affiliated with Mojang or Microsoft.</p>
+</footer>
+
+<script>
+  // mobile nav
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => io.observe(el));
+
+  // floating hero blocks
+  const heroBlocks = document.getElementById('heroBlocks');
+  const positions = [
+    {top:'12%',left:'8%'},{top:'70%',left:'14%'},{top:'20%',left:'85%'},
+    {top:'65%',left:'88%'},{top:'40%',left:'50%'},{top:'85%',left:'45%'},
+    {top:'8%',left:'45%'},{top:'55%',left:'6%'}
+  ];
+  positions.forEach((p,i) => {
+    const c = document.createElement('div');
+    c.className = 'cube';
+    c.style.top = p.top; c.style.left = p.left;
+    c.style.animationDelay = (i*0.7)+'s';
+    c.style.animationDuration = (7+i)+'s';
+    heroBlocks.appendChild(c);
+  });
+</script>
+
+</body>
+</html>
